@@ -1,71 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | Veritas Forensics</title>
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .dashboard-container {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 20px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    h1, h2 {
+      color: #fff;
+    }
+
+    #userEmail {
+      color: #9b59b6;
+    }
+
+    #logoutBtn {
+      background: #9b59b6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      float: right;
+      transition: background 0.3s ease;
+    }
+
+    #logoutBtn:hover {
+      background: #8e44ad;
+    }
+
+    .tool-card, .report-card {
+      background: #2a2a2a;
+      margin: 10px 0;
+      padding: 16px;
+      border-left: 4px solid #9b59b6;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #eee;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .tool-card:hover, .report-card:hover {
+      background-color: #3a3a3a;
+      transform: translateX(4px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-  <h2>Welcome</h2>
-  <p>Submit a report:</p>
-  <textarea id="report" rows="6" cols="50"></textarea><br>
-  <button id="saveBtn">Save Report</button>
+  <div class="dashboard-container">
+    <button id="logoutBtn">Sign Out</button>
+    <h1>Welcome, <span id="userEmail">Loading...</span></h1>
 
-  <h3>Your Reports:</h3>
-  <ul id="reportList"></ul>
+    <h2>Your Reports</h2>
+    <div id="reportList">
+      <!-- Dynamically populated -->
+    </div>
+
+    <h2>Available Tools</h2>
+    <div id="toolsList">
+      <a href="tool1.html" class="tool-card">🛠️ Tool 1</a>
+      <a href="tool2.html" class="tool-card">🔍 Tool 2</a>
+      <a href="tool3.html" class="tool-card">📄 Tool 3</a>
+    </div>
+  </div>
 
   <script type="module">
     import { auth, db } from "./firebase-config.js";
-    import {
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      collection,
-      addDoc,
-      query,
-      where,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const reportInput = document.getElementById("report");
-    const saveBtn = document.getElementById("saveBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userEmailSpan = document.getElementById("userEmail");
     const reportList = document.getElementById("reportList");
 
-    let currentUser = null;
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        currentUser = user;
-        loadReports();
-      }
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
     });
 
-    async function loadReports() {
-      const q = query(
-        collection(db, "reports"),
-        where("uid", "==", currentUser.uid)
-      );
-      const snap = await getDocs(q);
-      snap.forEach(doc => {
-        const li = document.createElement("li");
-        li.textContent = doc.data().text;
-        reportList.appendChild(li);
-      });
-    }
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        userEmailSpan.textContent = user.email;
 
-    saveBtn.addEventListener("click", async () => {
-      const text = reportInput.value.trim();
-      if (!text) return;
-      await addDoc(collection(db, "reports"), {
-        uid: currentUser.uid,
-        text,
-        createdAt: new Date()
-      });
-      reportInput.value = "";
-      reportList.innerHTML = "";
-      loadReports();
+        // Fetch user reports from Firestore
+        const q = query(collection(db, "reports"), where("uid", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          reportList.innerHTML = "<p>No reports found.</p>";
+        } else {
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.classList.add("report-card");
+            div.innerHTML = `<h3>${data.title}</h3><p>${data.summary}</p>`;
+            reportList.appendChild(div);
+          });
+        }
+      } else {
+        window.location.href = "login.html";
+      }
     });
   </script>
 </body>
