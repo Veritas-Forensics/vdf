@@ -26,7 +26,7 @@
 
       try {
         await signInWithEmailAndPassword(auth, email, pass);
-        window.location.href = "dashboard.html";
+        window.location.href = "dashboard";
       } catch (err) {
         document.getElementById("message").textContent = "❌ " + err.message;
       }
