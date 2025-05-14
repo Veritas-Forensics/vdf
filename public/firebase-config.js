@@ -4,7 +4,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyBQxgGBsahjvgcQd3K9L5MJYoHKsL2m6-E",
+  apiKey: "AIzaSyBQxgGBsahjvgcQd3K9L5MJYoHKsL2m6-E",
   authDomain: "veritas-forensics-dac0e.firebaseapp.com",
   projectId: "veritas-forensics-dac0e",
   storageBucket: "veritas-forensics-dac0e.firebasestorage.app",

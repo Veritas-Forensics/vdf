@@ -6,10 +6,12 @@
 </head>
 <body>
   <div class="container">
-    <h1>Login toooo Veritas Tools</h1>
-    <input type="email" id="email" placeholder="Email"><br>
-    <input type="password" id="password" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
+    <h1>Login 2 Veritas Tools</h1>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required><br>
+      <input type="password" id="password" placeholder="Password" required><br>
+      <button type="submit">Login</button>
+    </form>
     <p id="message"></p>
   </div>
 
@@ -17,18 +19,18 @@
     import { auth } from "./firebase-config.js";
     import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    document.querySelector("form").addEventListener("submit", async (e) => {
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const pass = document.getElementById("password").value;
+
       try {
         await signInWithEmailAndPassword(auth, email, pass);
         window.location.href = "dashboard.html";
       } catch (err) {
-        alert("Login failed: " + err.message);
+        document.getElementById("message").textContent = "❌ " + err.message;
       }
     });
   </script>
-
 </body>
 </html>
