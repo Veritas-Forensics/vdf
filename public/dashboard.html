@@ -1,14 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Welcome to your Dashboard</h2>
-    <p>More tools coming soon...</p>
-    <a href="logout.html">Logout</a>
-  </div>
+  <h2>Welcome</h2>
+  <p>Submit a report:</p>
+  <textarea id="report" rows="6" cols="50"></textarea><br>
+  <button id="saveBtn">Save Report</button>
+
+  <h3>Your Reports:</h3>
+  <ul id="reportList"></ul>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import {
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      collection,
+      addDoc,
+      query,
+      where,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const reportInput = document.getElementById("report");
+    const saveBtn = document.getElementById("saveBtn");
+    const reportList = document.getElementById("reportList");
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        currentUser = user;
+        loadReports();
+      }
+    });
+
+    async function loadReports() {
+      const q = query(
+        collection(db, "reports"),
+        where("uid", "==", currentUser.uid)
+      );
+      const snap = await getDocs(q);
+      snap.forEach(doc => {
+        const li = document.createElement("li");
+        li.textContent = doc.data().text;
+        reportList.appendChild(li);
+      });
+    }
+
+    saveBtn.addEventListener("click", async () => {
+      const text = reportInput.value.trim();
+      if (!text) return;
+      await addDoc(collection(db, "reports"), {
+        uid: currentUser.uid,
+        text,
+        createdAt: new Date()
+      });
+      reportInput.value = "";
+      reportList.innerHTML = "";
+      loadReports();
+    });
+  </script>
 </body>
 </html>

@@ -14,32 +14,21 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { auth } from "./firebase-config.js";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBQxgGBsahjvgcQd3K9L5MJYoHKsL2m6-E",
-      authDomain: "veritas-forensics-dac0e.firebaseapp.com",
-      projectId: "veritas-forensics-dac0e",
-      storageBucket: "veritas-forensics-dac0e.firebasestorage.app",
-      messagingSenderId: "24950400843",
-      appId: "1:24950400843:web:0a786ba3d14dd1bcc9aace",
-      measurementId: "G-VL9N02WH46"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    window.login = async function () {
+    document.querySelector("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
       const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const pass = document.getElementById("password").value;
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, pass);
         window.location.href = "dashboard.html";
-      } catch (e) {
-        document.getElementById("message").textContent = e.message;
+      } catch (err) {
+        alert("Login failed: " + err.message);
       }
-    };
+    });
   </script>
+
 </body>
 </html>
